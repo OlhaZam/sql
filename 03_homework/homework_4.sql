@@ -17,7 +17,9 @@ The `||` values concatenate the columns into strings.
 Edit the appropriate columns -- you're making two edits -- and the NULL rows will be fixed. 
 All the other rows will remain the same.) */
 
-
+SELECT 
+product_name || ', ' || COALESCE(product_size, '') || ' (' || COALESCE(product_qty_type, 'unit') || ')'
+FROM product;
 
 
 --Windowed Functions
@@ -39,7 +41,14 @@ only the customer’s most recent visit. */
 /* 3. Using a COUNT() window function, include a value along with each row of the 
 customer_purchases table that indicates how many different times that customer has purchased that product_id. */
 
-
+SELECT *
+FROM
+	(SELECT *,
+		ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY market_date DESC) as visit,
+		COUNT(*) OVER (PARTITION BY customer_id, product_id) AS purchase_count
+	FROM customer_purchases)
+AS numbered_visits
+WHERE visit = 1;
 
 
 -- String manipulations
@@ -55,10 +64,19 @@ Remove any trailing or leading whitespaces. Don't just use a case statement for 
 Hint: you might need to use INSTR(product_name,'-') to find the hyphens. INSTR will help split the column. */
 
 
-
 /* 2. Filter the query to show any product_size value that contain a number with REGEXP. */
 
-
+SELECT 
+    product_name,
+    CASE 
+        WHEN INSTR(product_name, '-') > 0 THEN TRIM(SUBSTR(product_name, INSTR(product_name, '-') + 1))
+        ELSE NULL
+    END AS description,
+    product_size
+FROM 
+    product
+WHERE 
+    product_size REGEXP '[0-9]';
 
 -- UNION
 /* 1. Using a UNION, write a query that displays the market dates with the highest and lowest total sales.
@@ -70,6 +88,40 @@ HINT: There are a possibly a few ways to do this query, but if you're struggling
 3) Query the second temp table twice, once for the best day, once for the worst day, 
 with a UNION binding them. */
 
+WITH sales_by_date AS (
+    SELECT
+        md.market_date,
+        SUM(cp.quantity * cp.cost_to_customer_per_qty) AS total_sales
+    FROM
+        customer_purchases cp
+    JOIN
+        market_date_info md ON cp.market_date = md.market_date
+    GROUP BY
+        md.market_date
+),
+ranked_sales_by_date AS (
+    SELECT
+        market_date,
+        total_sales,
+        RANK() OVER (ORDER BY total_sales DESC) AS sales_rank_desc,
+        RANK() OVER (ORDER BY total_sales ASC) AS sales_rank_asc
+    FROM
+        sales_by_date
+)
+SELECT 
+    market_date,
+    'Best Day' AS sales_category
+FROM 
+    ranked_sales_by_date
+WHERE 
+    sales_rank_desc = 1
 
+UNION
 
-
+SELECT 
+    market_date,
+    'Worst Day' AS sales_category
+FROM 
+    ranked_sales_by_date
+WHERE 
+    sales_rank_asc = 1;
