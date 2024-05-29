@@ -15,7 +15,8 @@ _Hint, search type 1 vs type 2 slowly changing dimensions._
 
 Bonus: Are there privacy implications to this, why or why not?
 ```
-Your answer...
+My answer:
+Both Type 1 (overwrite changes) and Type 2 (retain changes) approaches for storing customer addresses have privacy implications. Type 1 is simpler and stores less data, reducing the risk of data breaches but lacking historical accountability. Type 2 retains historical data, useful for audits and resolving disputes but increases the amount of sensitive data that needs protection. The choice depends on business needs, regulatory requirements, and the balance between historical data importance and privacy risks. Robust security measures and clear data policies are essential in either case.
 ```
 
 ## Question 4
@@ -23,7 +24,14 @@ Review the AdventureWorks Schema [here](https://i.stack.imgur.com/LMu4W.gif)
 
 Highlight at least two differences between it and your ERD. Would you change anything in yours?
 ```
-Your answer...
+My answer:
+
+1. Employee shifts logic.
+ My solution involves a separate EmployeeShift table to manage shift assignments with specific dates, providing detailed historical tracking. The AdventureWorks Schema solution integrates the ShiftID directly into the Employee table, simplifying shift management. I believe, my solution offers the advantages of historical tracking and flexible scheduling but is more complex and requires additional table management. In contrast, the AdventureWorks Schema solution is simpler and easier to manage, directly updating current shift assignments but lacks historical tracking and flexibility. If historical tracking and flexibility are crucial, than my solution is better; if simplicity and ease of use are more important, the AdventureWorks Schema solution is preferable.
+
+2. Book/Product price storage
+My solution of the book price stores the current book price directly in the Book table, while the AdventureWorks Schema solution uses a separate PriceListHistory table to track price changes over time. Storing the price in the Book table is simpler and provides faster access to the current price, but it lacks historical tracking and flexibility. On the other hand, the PriceListHistory table allows for detailed historical tracking and flexibility in managing price changes over time, which is useful for auditing and dynamic pricing, but it adds complexity and may impact performance due to additional joins and data management. If historical tracking and price management flexibility are crucial, the PriceListHistory table is better; if simplicity and performance are more important, storing the price in the Book table is preferable. 
+
 ```
 
 # Criteria
